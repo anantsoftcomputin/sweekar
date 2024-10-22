@@ -1,8 +1,10 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import theme from './theme'; // Make sure this is your custom theme
+import { ThemeProvider } from "@mui/material/styles";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import CssBaseline from "@mui/material/CssBaseline";
+import theme from "./theme";
 
 import Home from "./components/Home/Home";
 import Login from "./components/Login/Login";
@@ -14,16 +16,22 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import ResourceList from "./components/Resources/ResourceList/ResourceList";
 import ResourceDetail from "./components/Resources/ResourceDetail/ResourceDetail";
 import NotFound from "./components/NotFound/NotFound";
-import Placement from './components/Placement';
-import ResumeBuilder from './components/ResumeBuilder';
+import Placement from "./components/Placement";
+import ResumeBuilder from "./components/ResumeBuilder";
 import CoverLetterBuilder from "./components/CoverLetterBuilder";
-
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="min-h-screen bg-lavender-50">
+        <ToastContainer
+          limit={1}
+          theme="colored"
+          autoClose={3000}
+          position="top-center"
+          className="toast-container"
+        />
         <Header />
         <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Routes>
