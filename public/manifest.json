@@ -1,0 +1,63 @@
+{
+  "short_name": "Sweekar",
+  "name": "Sweekar App",
+  "description": "Sweekar - Empowering communities with valuable resources for Women and LGBTQIA+",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#1976d2",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "scope": "./",
+  "shortcuts": [
+    {
+      "name": "Women Resources",
+      "short_name": "Women",
+      "description": "Access women resources directly",
+      "url": "/women-resources",
+      "icons": [
+        {
+          "src": "icons/women.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "LGBTQIA Resources",
+      "short_name": "LGBTQIA",
+      "description": "Access LGBTQIA resources directly",
+      "url": "/lgbtqia-resources",
+      "icons": [
+        {
+          "src": "icons/lgbtqia.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
