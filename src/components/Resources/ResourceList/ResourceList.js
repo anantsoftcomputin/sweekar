@@ -16,16 +16,29 @@ const ResourceList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640);
     };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
+    const fetchResources = async () => {
+      try {
+        setLoading(true);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setLoading(false);
+      } catch (err) {
+        setLoading(false);
+      }
+    };
+
+    checkMobile();
+    fetchResources();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [category]);
   const filteredResources = resources.filter((resource) =>
     resource.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -92,7 +105,11 @@ const ResourceList = () => {
         </div>
 
         <div className="mt-6">
-          {paginateResources.length > 0 ? (
+          {loading ? (
+            <div className="flex justify-center p-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lavender-600"></div>
+            </div>
+          ) : paginateResources.length > 0 ? (
             <ResourceCard resource={paginateResources} />
           ) : (
             <div className="text-center mt-8">
