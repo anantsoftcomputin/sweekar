@@ -26,11 +26,6 @@ const ResourceList = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
-  };
-
   const filteredResources = resources.filter((resource) =>
     resource.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
