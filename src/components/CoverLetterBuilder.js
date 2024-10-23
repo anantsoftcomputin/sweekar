@@ -3,24 +3,10 @@ import { useReactToPrint } from "react-to-print";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { Eye, X } from "lucide-react";
-
-const RichTextEditor = ({ value, onChange, placeholder }) => {
-  return (
-    <div className="rich-text-editor">
-      <div
-        className="w-full p-2 border rounded min-h-[200px]"
-        contentEditable
-        dangerouslySetInnerHTML={{ __html: value }}
-        onBlur={(e) => onChange(e.target.innerHTML)}
-        placeholder={placeholder}
-      />
-    </div>
-  );
-};
+import RichTextEditor from "./UI/RichTextEditor";
 
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
       <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -96,14 +82,12 @@ const CoverLetterBuilder = () => {
       }
     } else {
       console.log("Web Share API not supported");
-      // Fallback: You could implement a modal to show a shareable link or QR code here
     }
   };
 
   const handleDownloadPDF = () => {
     const pdf = new jsPDF();
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 10;
 
     pdf.setFont("times", "normal");
@@ -236,6 +220,7 @@ const CoverLetterBuilder = () => {
     yPos += 10;
 
     // Signature
+    // eslint-disable-next-line no-unused-vars
     yPos = addText(
       coverLetterInfo.signature,
       margin,

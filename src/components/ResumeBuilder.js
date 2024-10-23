@@ -1,29 +1,20 @@
 import React, { useState, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye } from "lucide-react";
 import { Dialog, DialogContent } from "@mui/material";
-import { X } from "@mui/icons-material";
-
-// Simple Rich Text Editor Component
-const RichTextEditor = ({ value, onChange, placeholder }) => {
-  return (
-    <div className="rich-text-editor">
-      <div
-        className="w-full p-2 border rounded min-h-[100px]"
-        contentEditable
-        dangerouslySetInnerHTML={{ __html: value }}
-        onBlur={(e) => onChange(e.target.innerHTML)}
-        placeholder={placeholder}
-      />
-    </div>
-  );
-};
+import { database, storage } from "../firebase"; // Import Firebase database and storage
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage"; // Firebase storage methods
+import { ref as dbRef, push, serverTimestamp } from "firebase/database"; // Firebase database methods
+import RichTextEditor from "./UI/RichTextEditor";
+import { toast } from "react-toastify";
 
 const ResumeBuilder = () => {
   const [showMobilePreview, setShowMobilePreview] = useState(false);
-
   const [personalInfo, setPersonalInfo] = useState({
     name: "",
     jobTitle: "",
@@ -175,31 +166,6 @@ const ResumeBuilder = () => {
   const handlePrint = useReactToPrint({
     content: () => resumeRef.current,
   });
-
-  const handleShare = async () => {
-    const canvas = await html2canvas(resumeRef.current);
-    const imgData = canvas.toDataURL("image/png");
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "My Resume",
-          text: "Check out my resume!",
-          files: [
-            new File([await (await fetch(imgData)).blob()], "resume.png", {
-              type: "image/png",
-            }),
-          ],
-        });
-        console.log("Resume shared successfully");
-      } catch (error) {
-        console.error("Error sharing resume:", error);
-      }
-    } else {
-      console.log("Web Share API not supported");
-      // Fallback: You could implement a modal to show a shareable link or QR code here
-    }
-  };
 
   const handleDownloadPDF = () => {
     const pdf = new jsPDF();
@@ -407,12 +373,43 @@ const ResumeBuilder = () => {
       });
     }
 
+    // Convert the PDF to a Blob
+    const pdfBlob = pdf.output("blob");
+
+    // Reference to Firebase Storage
+    const fileRef = storageRef(storage, `resumes/${personalInfo.name}.pdf`);
+
+    // Upload the Blob to Firebase Storage
+    uploadBytes(fileRef, pdfBlob)
+      .then((snapshot) => {
+        // Get the download URL
+        return getDownloadURL(snapshot.ref);
+      })
+      .then((downloadURL) => {
+        // Save the PDF metadata to Firebase Realtime Database
+        const pdfData = {
+          name: personalInfo.name,
+          jobTitle: personalInfo.jobTitle,
+          url: downloadURL,
+          uploadedAt: serverTimestamp(),
+        };
+
+        return push(dbRef(database, "pdfs"), pdfData);
+      })
+      .then(() => {
+        toast.success("PDF successfully uploaded and saved to Firebase!");
+      })
+      .catch((error) => {
+        toast.error("Error uploading and saving PDF:", error);
+      });
+
+    // Trigger local download of the PDF
     pdf.save("resume.pdf");
   };
 
   const MobilePreviewModal = () => (
     <Dialog open={showMobilePreview} onOpenChange={setShowMobilePreview}>
-      <DialogContent className="w-[95%] h-[90vh] max-w-full mx-auto my-4 p-0 overflow-hidden">
+      <DialogContent className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto my-4 p-0 overflow-hidden">
         {/* Header */}
         <div className="sticky top-0 bg-white px-4 py-3 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-lg font-semibold">Resume Preview</h2>
@@ -578,10 +575,7 @@ const ResumeBuilder = () => {
 
         {/* Fixed Bottom Action Buttons */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex justify-center space-x-3">
-          <button
-            onClick={handlePrint}
-            className="bg-blue-500 text-white p-2 rounded-lg flex items-center space-x-2 text-sm"
-          >
+          <button onClick={handlePrint}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -597,10 +591,7 @@ const ResumeBuilder = () => {
               />
             </svg>
           </button>
-          <button
-            onClick={handleShare}
-            className="bg-green-500 text-white p-2 rounded-lg flex items-center space-x-2 text-sm"
-          >
+          <button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -616,10 +607,7 @@ const ResumeBuilder = () => {
               />
             </svg>
           </button>
-          <button
-            onClick={handleDownloadPDF}
-            className="bg-purple-500 text-white p-2 rounded-lg flex items-center space-x-2 text-sm"
-          >
+          <button onClick={handleDownloadPDF}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -921,7 +909,6 @@ const ResumeBuilder = () => {
                   </div>
                 ))}
               </div>
-
               <div>
                 <div className="flex gap-3 items-center">
                   <h2 className="text-xl font-semibold mb-2">Certifications</h2>
@@ -990,7 +977,6 @@ const ResumeBuilder = () => {
                   </div>
                 ))}
               </div>
-
               <div>
                 <div className="flex gap-3 items-center">
                   <h2 className="text-xl font-semibold mb-2">Awards</h2>
@@ -1059,7 +1045,6 @@ const ResumeBuilder = () => {
                   </div>
                 ))}
               </div>
-
               <div>
                 <div className="flex gap-3 items-center">
                   <h2 className="text-xl font-semibold mb-2">Languages</h2>
@@ -1122,7 +1107,6 @@ const ResumeBuilder = () => {
                 ))}
               </div>
             </div>
-
             {/* Preview Section */}
             {!showMobilePreview && (
               <div className="bg-gray-100 p-6 rounded-lg hidden sm:block">
@@ -1242,11 +1226,8 @@ const ResumeBuilder = () => {
                     </div>
                   </div>
                 </div>
-                <div className="mt-6 flex justify-center space-x-4">
-                  <button
-                    onClick={handlePrint}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-                  >
+                <div className="mt-6 flex justify-end space-x-4">
+                  <button onClick={handlePrint}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -1262,10 +1243,7 @@ const ResumeBuilder = () => {
                       />
                     </svg>
                   </button>
-                  <button
-                    onClick={handleShare}
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-                  >
+                  <button>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -1281,10 +1259,7 @@ const ResumeBuilder = () => {
                       />
                     </svg>
                   </button>
-                  <button
-                    onClick={handleDownloadPDF}
-                    className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition-colors"
-                  >
+                  <button onClick={handleDownloadPDF}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
