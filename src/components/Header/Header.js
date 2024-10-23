@@ -94,6 +94,9 @@ const Header = () => {
             >
               LGBTQIA Resources
             </MobileNavLink>
+            <MobileNavLink to="/placement" onClick={() => setIsMenuOpen(false)}>
+              Job Resources
+            </MobileNavLink>
             <MobileNavLink to="/profile" onClick={() => setIsMenuOpen(false)}>
               Profile
             </MobileNavLink>
